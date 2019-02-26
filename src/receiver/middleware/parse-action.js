@@ -20,6 +20,18 @@ module.exports = () => {
         return res.send('Error parsing payload')
       }
 
+      // Blockkit actions do not have callback id. Instead they use the
+      // action_id field to identify interactive actions.
+      if (body.type === 'block_actions') {
+        body.callback_id = body.actions[0].action_id
+        for (const action of body.actions) {
+          //We permute these in this strange way because the
+          //block_id must be unique
+          action.name = action.value
+          action.value = action.block_id
+        }
+      }
+
       req.slapp = {
         type: 'action',
         body: body,
